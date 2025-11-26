@@ -2,7 +2,6 @@
 /.gradle/
 .idea/
 /out/
-.claude/
 .kotlin/
 COMPILATION-ISSUES.md
 
