@@ -324,38 +324,41 @@ private suspend fun ApplicationCall.handleEditTask(store: TaskStore) {
  * Week 7: POST /tasks/{id}/edit - Update task
  */
 private suspend fun ApplicationCall.handleUpdateTask(store: TaskStore) {
+    timed("T2_edit", jsMode()) {
     val id = parameters["id"] ?: run {
-        respond(HttpStatusCode.BadRequest)
-        return
+        respond(HttpStatusCode.BadRequest, "Missing task ID")
+        return@timed
     }
 
     val task = store.getById(id)
     if (task == null) {
-        respond(HttpStatusCode.NotFound)
-        return
+        respond(HttpStatusCode.NotFound, "Task not found")
+        return@timed
     }
 
     val newTitle = receiveParameters()["title"]?.trim() ?: ""
     val validation = Task.validate(newTitle)
 
     if (validation is ValidationResult.Error) {
+        // Return error form
         if (isHtmxRequest()) {
-            // HTMX: return edit form with error
-            val html = renderTemplate("tasks/_edit.peb", mapOf(
-                "task" to task.toPebbleContext(),
-                "error" to validation.message
-            ))
+            val html = renderTemplate(
+                "tasks/_edit-form.peb",
+                mapOf("task" to task.toPebbleContext(), "error" to validation.message)
+            )
             respondText(html, ContentType.Text.Html)
         } else {
-            // No-JS: redirect back (would need error handling)
-            respondRedirect("/tasks")
+            response.headers.append("Location", "/tasks")
+            respond(HttpStatusCode.SeeOther)
         }
-        return
+        return@timed
     }
 
+    val updated = store.update(id, newTitle)
+
     // Update task
-    val updated = task.copy(title = newTitle)
-    store.update(updated)
+    // val updated = task.copy(title = newTitle)
+    // store.update(updated)
 
     if (isHtmxRequest()) {
         // HTMX: return view fragment
