@@ -325,49 +325,51 @@ private suspend fun ApplicationCall.handleEditTask(store: TaskStore) {
  */
 private suspend fun ApplicationCall.handleUpdateTask(store: TaskStore) {
     timed("T2_edit", jsMode()) {
-    val id = parameters["id"] ?: run {
-        respond(HttpStatusCode.BadRequest, "Missing task ID")
-        return@timed
-    }
-
-    val task = store.getById(id)
-    if (task == null) {
-        respond(HttpStatusCode.NotFound, "Task not found")
-        return@timed
-    }
-
-    val newTitle = receiveParameters()["title"]?.trim() ?: ""
-    val validation = Task.validate(newTitle)
-
-    if (validation is ValidationResult.Error) {
-        // Return error form
-        if (isHtmxRequest()) {
-            val html = renderTemplate(
-                "tasks/_edit-form.peb",
-                mapOf("task" to task.toPebbleContext(), "error" to validation.message)
-            )
-            respondText(html, ContentType.Text.Html)
-        } else {
-            response.headers.append("Location", "/tasks")
-            respond(HttpStatusCode.SeeOther)
+        val id = parameters["id"] ?: run {
+            respond(HttpStatusCode.BadRequest, "Missing task ID")
+            return@timed
         }
-        return@timed
-    }
 
-    val updated = store.update(id, newTitle)
+        val task = store.getById(id)
+        if (task == null) {
+            respond(HttpStatusCode.NotFound, "Task not found")
+            return@timed
+        }
 
-    // Update task
-    // val updated = task.copy(title = newTitle)
-    // store.update(updated)
+        val newTitle = receiveParameters()["title"]?.trim() ?: ""
+        val validation = Task.validate(newTitle)
 
-    if (isHtmxRequest()) {
-        // HTMX: return view fragment
-        val html = renderTemplate("tasks/_item.peb", mapOf("task" to updated.toPebbleContext()))
-        val status = """<div id="status" hx-swap-oob="true" role="status">Task updated successfully.</div>"""
-        respondText(html + status, ContentType.Text.Html)
-    } else {
-        // No-JS: redirect to list
-        respondRedirect("/tasks")
+        if (validation is ValidationResult.Error) {
+            // Return error form
+            if (isHtmxRequest()) {
+                val html = renderTemplate(
+                    "tasks/_edit-form.peb",
+                    mapOf("task" to task.toPebbleContext(), "error" to validation.message)
+                )
+                respondText(html, ContentType.Text.Html)
+            } else {
+                response.headers.append("Location", "/tasks")
+                respond(HttpStatusCode.SeeOther)
+            }
+            return@timed
+        }
+
+        val updated = task.copy(title = newTitle)
+        store.update(updated)
+
+        // Update task
+        // val updated = task.copy(title = newTitle)
+        // store.update(updated)
+
+        if (isHtmxRequest()) {
+            // HTMX: return view fragment
+            val html = renderTemplate("tasks/_item.peb", mapOf("task" to updated.toPebbleContext()))
+            val status = """<div id="status" hx-swap-oob="true" role="status">Task updated successfully.</div>"""
+            respondText(html + status, ContentType.Text.Html)
+        } else {
+            // No-JS: redirect to list
+            respondRedirect("/tasks")
+        }
     }
 }
 
