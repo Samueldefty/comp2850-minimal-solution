@@ -34,14 +34,14 @@
       position: static;
       width: auto;
       height: auto;
-      background: #1976d2;
+      background: #0d47a1;
       color: white;
       padding: 0.5rem 1rem;
       text-decoration: none;
       font-weight: bold;
       z-index: 9999;
     }
-    
+    /* background-color: rgb(62, 170, 165); */
     /* Pagination styles */
     .pagination {
       display: flex;
@@ -52,7 +52,8 @@
     /* Override Pico.css button color for WCAG 1.4.3 AA compliance */
     button[type="submit"],
     button {
-      color: white !important; /* White text on blue background for better contrast */
+      color: #2C2C2C !important; 
+      background-color: #bec1ff;
     }
   </style>
 </head>

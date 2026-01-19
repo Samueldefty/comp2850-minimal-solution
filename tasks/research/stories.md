@@ -152,3 +152,16 @@
 **WCAG**: 1.3.2 Meaningful Sequence (A)
 
 ---
+
+## Story S13: Dyslexic view
+**Situation**: I can’t read the text on the page very well as I’m dyslexic
+**Motivation**: the ability to change it to a different/more friendly font wiht a higher contrast colour
+**Outcome**: I can read it better and is easier to navigate
+**Underlying need**: reducing visual stress
+
+**Evidence**: dyslexic users using this
+**Inclusion risk**: Visual stress, Dyslexia
+**Type**: job story
+**WCAG**: 1.4.3 Contrast
+
+---
